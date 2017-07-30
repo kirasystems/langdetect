@@ -12,4 +12,18 @@ AC_CONFIG_FILES([
  src/Makefile
 ])
 
+# ----------------------------------------
+# Add host checks
+# ----------------------------------------
+AM_PROG_AR
+LT_INIT
+
+
+# ----------------------------------------
+# C++ related options
+# ----------------------------------------
+AC_LANG_CPLUSPLUS
+
+CXXFLAGS="$CXXFLAGS -std=c++11"
+
 AC_OUTPUT
