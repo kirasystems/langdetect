@@ -18,12 +18,16 @@ AC_CONFIG_FILES([
 AM_PROG_AR
 LT_INIT
 
-
 # ----------------------------------------
 # C++ related options
 # ----------------------------------------
 AC_LANG_CPLUSPLUS
 
 CXXFLAGS="$CXXFLAGS -std=c++11"
+
+# ----------------------------------------
+# Configuration file for pkg-config
+# ----------------------------------------
+AC_CONFIG_FILES([langdetect.pc])
 
 AC_OUTPUT

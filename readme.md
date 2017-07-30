@@ -33,8 +33,12 @@ langdetect path_1, path_2, ...
 If you want to use it with your C program, include `langdetect_c.h` instead of `langdetect.h`
 It has just 2 API, `langdetect_detect` and `langdetect_detect_with_score`, see `src/langdetect_c.h`.
 
-
 Enjoy!!
+
+Models
+======
+The models are embedding into the library. The file `src/const.cpp` contains
+the models and `scripts/profile_to_code.py` can convert new models to code.
 
 License
 =======
