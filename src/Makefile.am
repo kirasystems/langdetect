@@ -2,6 +2,7 @@ lib_LTLIBRARIES = liblangdetect.la
 liblangdetect_la_SOURCES = code_sequence.cpp const.cpp langdetect.cpp \
   ngram_storage.cpp normalizer.cpp unicode_data.cpp
 liblangdetect_la_LDFLAGS = -version-info 1:0:0
+include_HEADERS = langdetect.h langdetect_c.h
 
 bin_PROGRAMS = langdetect
 langdetect_SOURCES = command.cpp
