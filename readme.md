@@ -1,12 +1,8 @@
 langdetect
 ==========
 
-** This software is now experimental, not for any practical use, or at your own risk. **
-
-This is a C++ port of the language detection library [languge-detection](https://code.google.com/p/language-detection/).
-
-本ライブラリは[language-detection](https://code.google.com/p/language-detection/)をC/C++用に移植したものです。
-素晴らしいライブラリを公開された事に感謝です。
+This is a C++ port of the language detection library [languge-detection](https://code.google.com/p/language-detection/). The original port is 
+by Hiroyuki Tanaka (https://github.com/aflc/langdetect).
 
 Supported Compiler
 ==================
@@ -17,16 +13,11 @@ Install
 =======
 
 ```
-./waf configure build install
+./configure && make install
 ```
 
-If you prefer manual install path,
-
-```
-./waf configure --prefix=<install-path> build install
-```
-
-The library will be installed to <install-path>/{lib, include, bin}
+The library and command line application will be installed to `/usr/local` by 
+default.
 
 Usage
 =====
