@@ -28,7 +28,7 @@ def main():
     for prof in profiles:
         for ngram, freq in prof['freq'].items():
             d.setdefault(ngram, [0] * len(profiles))[len(langlist)] = freq / prof['n_words'][len(ngram) - 1]
-        langlist.append(prof['name'])
+        langlist.append('"'+prof['name']+'"')
     # output files
     obj = bytearray()
     for ngram, freqs in d.items():
@@ -48,12 +48,15 @@ def main():
     template = '''
 #include "./ngram_storage.h"
 #include <string>
+#include <vector>
 namespace langdetect {
-    std::string const NgramStorage::langdata_("$langlist");
+    std::vector<std::string> const NgramStorage::langlist_ = { 
+        $langlist
+    };
     std::string const NgramStorage::ngramdata_("$ngramdata", $datasize);
 }
 '''
-    print(string.Template(template).substitute(langlist=' '.join(langlist), ngramdata=s, datasize=len(obj)))
+    print(string.Template(template).substitute(langlist=', '.join(langlist), ngramdata=s, datasize=len(obj)))
 
 
 if __name__ == '__main__':

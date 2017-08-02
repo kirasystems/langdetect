@@ -11,9 +11,18 @@ class CodeSequence {
     public:
         CodeSequence(char const *data, size_t const &length);
 
+        // The length of the sequence.
+        size_t size();
+
         /// ngramバイト列の配列を返す。
         /// バイト列は4byteコードポイント（リトルエンディアン）の列になっている
         std::vector<std::string> tongram();
+
+        // Convert only a range to ngrams.
+        std::vector<std::string> range_to_ngram(size_t start, size_t end);
+
+
+
     private:
         std::vector<uint32_t> codes_;
 

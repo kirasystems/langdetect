@@ -3,5 +3,9 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
+Name: @PACKAGE_NAME@
+Description: A language detection library originally designed by Shuyo Nakatani.
+URL: https://github.com/kirasystems/langdetect
+Version: @VERSION@
 Cflags: -I${includedir}
 Libs: -L${libdir} -llangdetect

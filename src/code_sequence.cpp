@@ -28,13 +28,21 @@ CodeSequence::CodeSequence(char const *data, size_t const &length) {
     // for(size_t i = 0; i < codes_.size(); ++i) std::cout << "normalized: " << std::hex << codes_[i] << std::endl;
 }
 
+size_t CodeSequence::size() {
+    return codes_.size();
+}
+
 vector<string> CodeSequence::tongram() {
+    range_to_ngram(0, codes_.size());
+}
+
+vector<string> CodeSequence::range_to_ngram(size_t start, size_t end) {
     uint32_t const whitespace = 0x0020;
     string wsstr(reinterpret_cast<char const *>(&whitespace), 4);
     vector<string> ngrams;
     string ngram(wsstr);
     bool iscapital = false;
-    for(size_t i = 0; i < codes_.size(); ++i) {
+    for(size_t i = start; i < end; ++i) {
         string lastone = ngram.substr(ngram.length() - 4, 4);
         if(lastone == wsstr) {
             ngram = string(wsstr);
@@ -51,14 +59,11 @@ vector<string> CodeSequence::tongram() {
         }
 
         // append to ngrams
-        // std::cout << "code = " << std::hex << codes_[i] << std::endl;
         if(!iscapital) {
             for(size_t i = 0; i < ngram.length(); i += 4) {
                 string apstr = ngram.substr(i);
                 if(apstr == wsstr) continue;
                 if(NgramStorage::instance().has(apstr)) ngrams.push_back(apstr);
-                // for(size_t i = 0; i < apstr.length(); ++i) std::cout << std::hex << (int)*(uint8_t *)(apstr.data() + i) << " ";
-                // std::cout << std::endl;
             }
         }
     }

@@ -1,4 +1,4 @@
-AC_INIT([langdetect], [1.0], [https://github.com/kirasystems/langdetect])
+AC_INIT([langdetect], [1.0.0], [https://github.com/kirasystems/langdetect])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
 AC_PROG_CXX

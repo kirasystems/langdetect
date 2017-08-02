@@ -12,7 +12,6 @@
 #include "./ngram_storage.h"
 #include "./code_sequence.h"
 
-#define LANG_FAIL_EMPTY Detected("empty", 0.0)
 #define MATH_PI 3.1415926535897932384626433832795
 
 using std::string;
@@ -21,25 +20,74 @@ using std::vector;
 
 namespace langdetect {
     unsigned int const Detector::MAX_READ_SIZE = 12288;
-    int const Detector::DEFAULT_TRIAL = 7;
+    int const Detector::DEFAULT_TRIAL = 40;
     double const Detector::DEFAULT_ALPHA = 0.5;
     double const Detector::ALPHA_WIDTH = 0.05;
     int const Detector::ITERATION_LIMIT = 1000;
     double const Detector::PROB_THRESHOLD = 0.1;
     double const Detector::CONV_THRESHOLD = 0.99999;
     int const Detector::BASE_FREQ = 10000;
+    int const Detector::WINDOW_SIZE = 100;
     std::string const Detector::UNKNOWN_LANG = "unknown";
 
     Detector::Detector() : trial_(DEFAULT_TRIAL), alpha_(DEFAULT_ALPHA) {}
 
     Detected Detector::detect(char const *data, unsigned int const &length) {
-        if(length == 0) return LANG_FAIL_EMPTY;
-        NgramStorage& storage = NgramStorage::instance();
+        if(length == 0) {
+            return Detected("empty", 0.0);
+        }
         size_t rlen = length;
         if(rlen > MAX_READ_SIZE) rlen = MAX_READ_SIZE;
         CodeSequence codesequence(data, rlen);
         vector<string> grams = codesequence.tongram();
-        if(grams.empty()) return Detected(UNKNOWN_LANG, 0.0);
+        vector<Detected> detecteds = detect_(grams);
+        std::sort(detecteds.begin(), detecteds.end());
+        return detecteds.back();
+    }
+
+    std::vector<Detected> Detector::detect_multiple(char const *data, unsigned int const &length) {
+        vector<Detected> all_windows;
+        if(length == 0) {
+            all_windows.push_back(Detected("empty", 0.0));
+            return all_windows;
+        }
+        CodeSequence codesequence(data, length);
+        unsigned int start = 0, end = 0, num_windows = 0;
+        std::vector<std::vector<Detected>> windows;
+        while ( start < codesequence.size() ) {
+            ++num_windows;
+            end = start + WINDOW_SIZE;
+            if (end > codesequence.size() ) end = codesequence.size();
+            vector<string> ngrams = codesequence.range_to_ngram(start, end);
+            windows.push_back(detect_(ngrams));
+            start = end;
+        }
+
+        for (auto window : windows) {
+            if (all_windows.size() == 0) {
+                all_windows = window;
+            } else {
+                for (unsigned i = 0; i < window.size(); ++i) {
+                    all_windows[i].score( window[i].score() + all_windows[i].score() );
+                }
+            }
+        }
+
+        for (auto &lang : all_windows ) {
+            lang.score(lang.score() / (double) num_windows);
+        }
+
+        std::sort(all_windows.begin(), all_windows.end());
+        return all_windows;
+    }
+
+    std::vector<Detected> Detector::detect_(vector<string> &grams) {
+        vector<Detected> detecteds;
+        if(grams.empty()) {
+            detecteds.push_back(Detected(UNKNOWN_LANG, 0.0));
+            return detecteds;
+        }
+        NgramStorage& storage = NgramStorage::instance();
         vector<double> finalscores(storage.langsize(), 0);
         for(int i = 0; i < trial_; ++i) {
             vector<double> scores(storage.langsize(), 1.0 / storage.langsize());  // priorはuniformに固定する
@@ -60,17 +108,12 @@ namespace langdetect {
             }
         }
 
-        vector<Detected> detecteds(storage.langsize());
+        detecteds.resize(storage.langsize());
         for(size_t i = 0; i < finalscores.size(); ++i) {
             detecteds[i].name(storage.lang_fromindex(i));
             detecteds[i].score(finalscores[i]);
         }
-        // for(auto &d : detecteds) {
-        //     std::cout << d.name() << ", " << d.score() << std::endl;
-        // }
-        // sort
-        std::sort(detecteds.begin(), detecteds.end());
-        return detecteds.back();
+        return detecteds;
     }
 
     void Detector::update_scores_(string const &ngram, vector<double> &scores, double const &alpha) {
@@ -78,13 +121,10 @@ namespace langdetect {
         if(storage.has(ngram)) {
             double weight = alpha / BASE_FREQ;
             auto plist = storage.get(ngram);
-            // for(size_t i = 0; i < ngram.length(); ++i) std::cout << std::hex << (int)*(uint8_t *)(ngram.data() + i) << " ";
-            // std::cout << std::endl;
+            
             for(size_t i = 0; i < plist.size(); ++i) {
-                // std::cout << " [" << storage.lang_fromindex(i) << "]= " << plist[i];
                 scores[i] *= weight + plist[i];
             }
-            // std::cout << std::endl;
         }
     }
 
@@ -158,7 +198,8 @@ void langdetect_detect_with_score(char const *data, unsigned int const length, c
     try {
         langdetect::Detected result = detector.detect(data, length);
         *score = result.score();
-        memcpy(lang, result.name().c_str(), result.name().length() + 1);
+        memcpy(lang, result.name().c_str(), 
+               result.name().length() + 1);
     } catch(std::runtime_error const &e) {
         memcpy(lang, "null", 4);
         lang[5] = '\0';
