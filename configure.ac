@@ -31,3 +31,4 @@ CXXFLAGS="$CXXFLAGS -std=c++11"
 AC_CONFIG_FILES([langdetect.pc])
 
 AC_OUTPUT
+
