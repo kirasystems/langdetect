@@ -19,6 +19,13 @@ Install
 The library and command line application will be installed to `/usr/local` by 
 default.
 
+If you check out from source control, you'll need to run autoreconf before
+you'll be able to run configure:
+
+```
+./autoreconf -i
+```
+
 Usage
 =====
 
